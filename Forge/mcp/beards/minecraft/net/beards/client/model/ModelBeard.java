@@ -6,6 +6,7 @@
 
 package net.beards.client.model;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelBox;
 import net.minecraft.client.model.ModelRenderer;
@@ -181,116 +182,127 @@ public class ModelBeard extends ModelBase
 		setRotation(stage14, -0.6981317F, 0F, 0F);
 	}
 
-	public void render(Entity entity, float f, float f1, float f2, float f3, float f4, float f5, int beardGrowth)
+	public void render(Entity entity, float f, float f1, float f2, float f3, float f4, float f5, int beardStage, int growStage)
 	{
 		super.render(entity, f, f1, f2, f3, f4, f5);
 		setRotationAngles(f, f1, f2, f3, f4, f5, entity);
-		beardGrowth = 24; //TODO LEFT OFF AT CREATING OFFSETS FOR THE BEARDS...
-		if (beardGrowth >= 1)
+		beardStage = 15;
+		if (beardStage >= 1)
 		{
 			GL11.glPushMatrix();
 			GL11.glScalef(1.0f, 1.0f, 1.0f);
 			stage1.render(f5);
 			GL11.glPopMatrix();
 		}
-		if (beardGrowth >= 4)
+		if (beardStage >= 2)
 		{
 			stage2a.render(f5);
 			stage2b.render(f5);
 			stage2c.render(f5);
 		}
-		if (beardGrowth >= 7)
+		if (beardStage >= 3)
 		{
 			stage3a.render(f5);
 			stage3b.render(f5);
 		}
-		if (beardGrowth >= 10)
+		if (beardStage >= 4)
 		{
 			stage4a.render(f5);
 			stage4b.render(f5);
 		}
-		if (beardGrowth >= 13)
+		if (beardStage >= 5)
 		{
 			stage5a.render(f5);
 			stage5c.render(f5);
 			stage5b.render(f5);
 		}
-		if (beardGrowth >= 16)
+		if (beardStage >= 6)
 		{
 			stage6a.render(f5);
 			stage6b.render(f5);
 		}
-		if (beardGrowth >= 19)
+		if (beardStage >= 7)
 		{
 			stage7a.render(f5);
 			stage7b.render(f5);
 			stage7c.render(f5);
 			stage7d.render(f5);
 		}
-		if (beardGrowth >= 21)
+		if (beardStage >= 8)
 		{
 			stage9a.render(f5);
 			stage9b.render(f5);
 		}
-		if (entity.motionX > 0 || entity.motionZ > 0)
+		if (entity != null && (entity.motionX > 0 || entity.motionZ > 0))
 		{
-			beardShake += 0.25f;
+			//			beardShake += 0.25f;
+			beardShake += (float) (beardStage / 3) / 15;
 		}
 		else if (beardShake > 0)
 		{
 			beardShake -= 0.05f;
 		}
-		GL11.glRotatef((float) Math.cos(beardShake) * 5, 0.5f, 1.0f, 0.0f);
-		GL11.glRotatef((float) Math.sin(beardShake) * 5, 0.0f, 1.0f, 0.5f);
-		if (!(entity.rotationPitch < -10))
-			GL11.glRotatef(-entity.rotationPitch, (entity.rotationPitch * 180 / (float) Math.PI), 0, 0);
-		if (beardGrowth >= 24)
+		Minecraft mc = Minecraft.getMinecraft();
+		if (mc.currentScreen == null || (mc.currentScreen != null && !mc.currentScreen.doesGuiPauseGame()))
 		{
-			if (beardGrowth < 27)
-				doGrowth(stage10, beardGrowth);
+			GL11.glRotatef((float) Math.cos(beardShake) * 5, 0.5f, 1.0f, 0.0f);
+			GL11.glRotatef((float) Math.sin(beardShake) * 5, 0.0f, 1.0f, 0.5f);
+			if (entity != null && !(entity.rotationPitch < -10))
+				GL11.glRotatef(-entity.rotationPitch, (entity.rotationPitch * 180 / (float) Math.PI), 0, 0);
+		}
+		if (beardStage >= 9)
+		{
+			doGrowth(stage15, beardStage, growStage);
 			stage10.render(f5);
 		}
-		if (beardGrowth >= 27)
+		if (beardStage >= 10)
 		{
-			if (beardGrowth < 30)
-				doGrowth(stage11, beardGrowth);
+			doGrowth(stage15, beardStage, growStage);
 			stage11.render(f5);
 		}
-		if (beardGrowth >= 30)
+		if (beardStage >= 11)
 		{
-			if (beardGrowth < 33)
-				doGrowth(stage12, beardGrowth);
+			doGrowth(stage15, beardStage, growStage);
 			stage12.render(f5);
 		}
-		if (beardGrowth >= 33)
+		if (beardStage >= 12)
 		{
-			if (beardGrowth < 36)
-				doGrowth(stage13, beardGrowth);
+			doGrowth(stage15, beardStage, growStage);
 			stage13.render(f5);
 		}
-		if (beardGrowth >= 36)
+		if (beardStage >= 13)
 		{
-			if (beardGrowth < 39)
-				doGrowth(stage14, beardGrowth);
+			doGrowth(stage15, beardStage, growStage);
 			stage14.render(f5);
 		}
-		if (beardGrowth >= 39)
+		if (beardStage >= 14)
 		{
-			if (beardGrowth < 41)
-				doGrowth(stage15, beardGrowth);
+			doGrowth(stage15, beardStage, growStage);
 			stage15.render(f5);
 		}
 	}
 
-	private void doGrowth(ModelRenderer model, int beardGrowth)
+	private void doGrowth(ModelRenderer model, int beardGrowth, int growStage, int... yOffset)
 	{
-		float sqrt = (float)(Math.sqrt(beardGrowth / 3)) / 10;
-		GL11.glScalef(sqrt, sqrt, sqrt);
-		if (model.cubeList.get(0) != null)
-		{
-			ModelBox box = (ModelBox) model.cubeList.get(0);
-			GL11.glTranslatef(0f, (box.posY2 - box.posY1) / 5.5f, -0.5f);
-		}
+		float sqrt = (float) (Math.sqrt(beardGrowth / 3) / 3) / 10;
+		//		GL11.glScalef(sqrt, sqrt, sqrt);
+		//		if (model.cubeList.get(0) != null)
+		//		{
+		//			ModelBox box = (ModelBox) model.cubeList.get(0);
+		//			GL11.glTranslatef(0f, model.offsetZ - (box.posY2 - box.posY1) + sqrt * 3, 0f);
+		//			if (yOffset.length >= 3)
+		//			{
+		//				if ((beardGrowth & 3) == 1)
+		//				{
+		//
+		//				}
+		//				GL11.glTranslatef(0f, (box.posY2 - box.posY1) / 5.5f, -0.5f);
+		//			}
+		//			else
+		//			{
+		//				GL11.glTranslatef(0f, (box.posY2 - box.posY1) / 5.5f, -0.5f);
+		//			}
+		//		}
 	}
 
 	private void setRotation(ModelRenderer model, float x, float y, float z)

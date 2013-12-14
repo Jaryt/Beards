@@ -31,11 +31,11 @@ public class PlayerTracker implements IPlayerTracker
 					{
 						if (entityPlayer.username.equals("LexManos"))
 						{
-							stream.writeInt(9001);
-							entityPlayer.getEntityData().setInteger("LexManos", 9001);
+							entityPlayer.getEntityData().setInteger("BeardGrowth", 100);
+							entityPlayer.getEntityData().setInteger("BeardStage", 3);
 						}
-						else
-							stream.writeInt(tag.getInteger("BeardGrowth"));
+						stream.writeInt(tag.getInteger("BeardGrowth"));
+						stream.writeInt(tag.getInteger("BeardStage"));
 						stream.writeUTF(entityPlayer.username);
 					}
 					catch (IOException e)

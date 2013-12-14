@@ -7,6 +7,7 @@ import net.beards.client.model.ModelBeard;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.event.FOVUpdateEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.event.ForgeSubscribe;
 
@@ -21,26 +22,35 @@ public class ClientEvent
 	@ForgeSubscribe
 	public void onPlayerRender(RenderPlayerEvent.Post event)
 	{
-		NBTTagCompound tag = event.entityPlayer.getEntityData();
-		if (tag != null && tag.hasKey("BeardGrowth"))
+		NBTTagCompound tag = event.entityLiving.getEntityData();
+		if (tag != null)
 		{
 			GL11.glPushMatrix();
 			GL11.glRotatef(180, 0, 0, 1);
 			GL11.glRotatef(180, 0, 1, 0);
 			GL11.glTranslatef(0.0f, 0.25f, 0.01f);
-			if (event.entityPlayer.isSneaking())
+			if (event.entityLiving.isSneaking())
 				GL11.glTranslatef(0, 0.05f, 0);
 			GL11.glTranslatef(0, -0.03f, 0);
-			//		Color color = Color.getHSBColor(event.entityPlayer.ticksExisted % 20 / 20F, 1, new Random().nextFloat());
-			//		GL11.glColor3f(color.getRed(), color.getGreen(), color.getBlue());
-//			GL11.glColor3f(0.2F, 0.1f, 0.0f);
-			GL11.glColor3f(0.0F, 1.0f, 0.0f);
-			GL11.glRotatef(interpolateRotation(event.entityPlayer.prevRotationYawHead, event.entityPlayer.rotationYawHead, 1), 0, 1, 0);
-			GL11.glRotatef(interpolateRotation(event.entityPlayer.prevRotationPitch, event.entityPlayer.rotationPitch, 1), 1, 0, 0);
+			Color color = Color.getHSBColor(event.entityLiving.ticksExisted % 20 / 20F, 1, new Random().nextFloat());
+			if (tag.getString("BeardName").equals("jeb_"))
+				GL11.glColor3f(color.getRed(), color.getGreen(), color.getBlue());
+			else
+				GL11.glColor3f(tag.getFloat("BeardRed"), tag.getFloat("BeardGreen"), tag.getFloat("BeardBlue"));
+			GL11.glRotatef(interpolateRotation(event.entityLiving.prevRotationYawHead, event.entityLiving.rotationYawHead, 1), 0, 1, 0);
+			GL11.glRotatef(interpolateRotation(event.entityLiving.prevRotationPitch, event.entityLiving.rotationPitch, 1), 1, 0, 0);
+			GL11.glEnable(GL11.GL_LIGHTING);
 			Minecraft.getMinecraft().renderEngine.bindTexture(BEARD_TEXTURE);
-			beard.render(event.entityPlayer, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0625f, tag.getInteger("BeardGrowth"));
+			beard.render(event.entityLiving, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0625f, tag.getInteger("BeardGrowth"), tag.getInteger("BeardStage"));
 			GL11.glPopMatrix();
 		}
+	}
+
+	@ForgeSubscribe
+	public void onFOVUpdate(FOVUpdateEvent event)
+	{
+		if (!Minecraft.getMinecraft().gameSettings.keyBindDrop.pressed)
+			event.newfov -= 0.7f;
 	}
 
 	private float interpolateRotation(float par1, float par2, float par3)

@@ -1,15 +1,13 @@
 package net.beards.client;
 
 import net.beards.CommonProxy;
-import net.beards.client.model.ModelBeard;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.event.RenderPlayerEvent;
+import net.beards.client.keys.KeyEventBeard;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.EventBus;
-import cpw.mods.fml.common.Mod.EventHandler;
-import cpw.mods.fml.common.registry.TickRegistry;
-import cpw.mods.fml.relauncher.Side;
+
+import org.lwjgl.input.Keyboard;
+
+import cpw.mods.fml.client.registry.KeyBindingRegistry;
 
 public class ClientProxy extends CommonProxy
 {
@@ -19,6 +17,7 @@ public class ClientProxy extends CommonProxy
 	{
 		super.init();
 		MinecraftForge.EVENT_BUS.register(new ClientEvent());
+		KeyBindingRegistry.registerKeyBinding(new KeyEventBeard(new KeyBinding[] { new KeyBinding("Beard Customizer", Keyboard.KEY_B) }, new boolean[] { false }));
 	}
 
 }

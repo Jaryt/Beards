@@ -29,26 +29,41 @@ public class CommonEventHandler
 		{
 			if (entityTag != null && (event.entityLiving.ticksExisted % 20) == 1)
 			{
-				if (entityTag.hasKey("BeardGrowth") && !event.entityLiving.isDead)
+				if (entityTag.hasKey("BeardStage") && !event.entityLiving.isDead)
 				{
-					if (entityTag.getInteger("BeardGrowth") < 41)
+					if (entityTag.getInteger("BeardStage") == 3)
 					{
-//						entityTag.setInteger("BeardGrowth", entityTag.getInteger("BeardGrowth") + 1);
+						if (entityTag.hasKey("BeardGrowth"))
+						{
+							if (entityTag.getInteger("BeardGrowth") < 15)
+							{
+								entityTag.setInteger("BeardGrowth", entityTag.getInteger("BeardGrowth") + 1);
+								shouldSendUpdate = true;
+							}
+						}
+						else
+						{
+							entityTag.setInteger("BeardGrowth", entityTag.getInteger("BeardGrowth"));
+							shouldSendUpdate = true;
+						}
+						entityTag.setInteger("BeardStage", 0);
+					}
+					else
+					{
+						entityTag.setInteger("BeardStage", entityTag.getInteger("BeardStage") + 1);
 						shouldSendUpdate = true;
-					} else {
-						entityTag.setInteger("BeardGrowth", 0);
 					}
 				}
 				else
 				{
-					entityTag.setInteger("BeardGrowth", entityTag.getInteger("BeardGrowth"));
-					shouldSendUpdate = true;
+					entityTag.setInteger("BeardStage", entityTag.getInteger("BeardStage"));
 				}
 			}
 			if (shouldSendUpdate)
 			{
 				ByteArrayOutputStream data = new ByteArrayOutputStream();
 				data.write(entityTag.getInteger("BeardGrowth"));
+				data.write(entityTag.getInteger("BeardStage"));
 				PacketDispatcher.sendPacketToAllPlayers(new Packet250CustomPayload("beards", data.toByteArray()));
 				shouldSendUpdate = false;
 			}
