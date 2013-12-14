@@ -27,12 +27,17 @@ public class CommonEventHandler
 		boolean shouldSendUpdate = false;
 		if (!event.entityLiving.worldObj.isRemote && event.entityLiving instanceof EntityPlayer)
 		{
-			if (entityTag != null && (event.entityLiving.ticksExisted % 20) <= 20)
+			if (entityTag != null && (event.entityLiving.ticksExisted % 20) == 1)
 			{
 				if (entityTag.hasKey("BeardGrowth") && !event.entityLiving.isDead)
 				{
-					entityTag.setInteger("BeardGrowth", entityTag.getInteger("BeardGrowth") + 1);
-					shouldSendUpdate = true;
+					if (entityTag.getInteger("BeardGrowth") < 41)
+					{
+//						entityTag.setInteger("BeardGrowth", entityTag.getInteger("BeardGrowth") + 1);
+						shouldSendUpdate = true;
+					} else {
+						entityTag.setInteger("BeardGrowth", 0);
+					}
 				}
 				else
 				{
