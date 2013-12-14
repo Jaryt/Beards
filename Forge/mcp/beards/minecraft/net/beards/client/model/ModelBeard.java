@@ -187,6 +187,7 @@ public class ModelBeard extends ModelBase
 		super.render(entity, f, f1, f2, f3, f4, f5);
 		setRotationAngles(f, f1, f2, f3, f4, f5, entity);
 		beardStage = 15;
+		
 		if (beardStage >= 1)
 		{
 			GL11.glPushMatrix();
