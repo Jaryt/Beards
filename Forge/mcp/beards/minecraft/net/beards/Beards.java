@@ -1,5 +1,6 @@
 package net.beards;
 
+import net.beards.beard.Beard;
 import net.beards.client.ClientPacketHandler;
 import net.minecraftforge.common.MinecraftForge;
 import cpw.mods.fml.common.Mod;
@@ -24,13 +25,9 @@ public class Beards
 	public static Beards beards; 
 	
 	@EventHandler
-	public void preLoad(FMLPreInitializationEvent event)
-	{
-	}
-
-	@EventHandler
 	public void load(FMLInitializationEvent event)
 	{
+		Beard.createBeards();
 		proxy.init();
 		GameRegistry.registerPlayerTracker(new PlayerTracker());
 	}

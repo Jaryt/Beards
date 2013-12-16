@@ -24,6 +24,7 @@ import net.minecraft.network.INetworkManager;
 import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.util.ResourceLocation;
 import cpw.mods.fml.common.network.IPacketHandler;
+import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
 
 public class ClientPacketHandler implements IPacketHandler
@@ -35,51 +36,51 @@ public class ClientPacketHandler implements IPacketHandler
 		EntityClientPlayerMP playerCMP = (EntityClientPlayerMP) player;
 		if (playerCMP.getEntityData() != null)
 		{
-			if (packet.data.length == 2)
+			NBTTagCompound tag = playerCMP.getEntityData();
+			ByteArrayInputStream byteStream = new ByteArrayInputStream(packet.data);
+			DataInputStream stream = new DataInputStream(byteStream);
+			EntityPlayer updatedPlayer = null;
+			try
 			{
-				NBTTagCompound tag = playerCMP.getEntityData();
-				tag.setInteger("BeardGrowth", packet.data[0]);
-				tag.setInteger("BeardStage", packet.data[1]);
-			}
-			else if (packet.data.length == 3)
-			{
-				ByteArrayInputStream byteStream = new ByteArrayInputStream(packet.data);
-				DataInputStream stream = new DataInputStream(byteStream);
-				try
+				int packetId = stream.readInt();
+				switch (packetId)
 				{
-					int beardSize = stream.readInt();
-					String playerName = stream.readUTF();
-					for (Object playerObj : playerCMP.worldObj.playerEntities)
-					{
-						EntityPlayer entityPlayer = (EntityPlayer) playerObj;
-						NBTTagCompound tag = entityPlayer.getEntityData();
-						if (entityPlayer.username.equals(playerName))
-						{
-							if (tag != null)
-							{
-								tag.setInteger("BeardGrowth", beardSize);
-								tag.setInteger("BeardStage", beardSize);
-							}
-						}
-					}
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
-			}
-			else if (packet.data.length == 14) // for when a player confirms a beard color change
-			{
-				ByteArrayInputStream input = new ByteArrayInputStream(packet.data);
-				DataInputStream stream = new DataInputStream(input);
-				try
-				{
+				case 0:
+					tag.setInteger("BeardGrowth", stream.readInt());
+					tag.setInteger("BeardStage", stream.readInt());
+					break;
+				case 1:
 					String beardName = stream.readUTF();
 					float r = stream.readFloat();
 					float g = stream.readFloat();
 					float b = stream.readFloat();
-
-					NBTTagCompound tag = playerCMP.getEntityData();
+					int beardSize = stream.readInt();
+					int beardStage = stream.readInt();
+					String playerName = stream.readUTF();
+					if (playerCMP != null)
+						updatedPlayer = playerCMP.worldObj.getPlayerEntityByName(playerName);
+					if (updatedPlayer != null)
+						tag = updatedPlayer.getEntityData();
+					if (tag != null)
+					{
+						tag.setString("BeardName", beardName);
+						tag.setFloat("BeardRed", r);
+						tag.setFloat("BeardGreen", g);
+						tag.setFloat("BeardBlue", b);
+						tag.setInteger("BeardGrowth", beardSize);
+						tag.setInteger("BeardStage", beardSize);
+					}
+					break;
+				case 2:
+					playerName = stream.readUTF();
+					beardName = stream.readUTF();
+					r = stream.readFloat();
+					g = stream.readFloat();
+					b = stream.readFloat();
+					if (playerCMP != null)
+						updatedPlayer = playerCMP.worldObj.getPlayerEntityByName(playerName);
+					if (updatedPlayer != null)
+						tag = updatedPlayer.getEntityData();
 					if (tag != null)
 					{
 						tag.setFloat("BeardRed", r);
@@ -87,12 +88,35 @@ public class ClientPacketHandler implements IPacketHandler
 						tag.setFloat("BeardBlue", b);
 						tag.setString("BeardName", beardName);
 					}
+					break;
+				case 3:
+					playerName = stream.readUTF();
+					beardStage = stream.readInt();
+					beardSize = stream.readInt();
+					beardName = stream.readUTF();
+					r = stream.readFloat();
+					g = stream.readFloat();
+					b = stream.readFloat();
+					if (playerCMP != null)
+						updatedPlayer = playerCMP.worldObj.getPlayerEntityByName(playerName);
+					if (updatedPlayer != null)
+						tag = updatedPlayer.getEntityData();
+					if (tag != null)
+					{
+						tag.setString("BeardName", beardName);
+						tag.setFloat("BeardRed", r);
+						tag.setFloat("BeardGreen", g);
+						tag.setFloat("BeardBlue", b);
+						tag.setInteger("BeardGrowth", beardSize);
+						tag.setInteger("BeardStage", beardSize);
+						tag.setBoolean("BeardSeen", true);
+					}
+					break;
 				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
-
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
 			}
 		}
 	}

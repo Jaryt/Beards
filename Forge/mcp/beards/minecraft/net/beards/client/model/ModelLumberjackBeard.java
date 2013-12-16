@@ -14,7 +14,7 @@ import net.minecraft.entity.Entity;
 
 import org.lwjgl.opengl.GL11;
 
-public class ModelBeard extends ModelBase
+public class ModelLumberjackBeard extends ModelBeardBase
 {
 	//fields
 	ModelRenderer stage15, stage3b, stage1, stage4b, stage3a, stage9b, stage2a, stage5b, stage4a;
@@ -25,11 +25,10 @@ public class ModelBeard extends ModelBase
 
 	public float beardShake = 0;
 
-	public ModelBeard()
+	public ModelLumberjackBeard()
 	{
 		textureWidth = 32;
 		textureHeight = 32;
-
 		stage15 = new ModelRenderer(this, 12, 28);
 		stage15.addBox(-1.5F, 10F, -1.4F, 3, 2, 2);
 		stage15.setRotationPoint(0F, 0F, 0F);
@@ -187,7 +186,7 @@ public class ModelBeard extends ModelBase
 		super.render(entity, f, f1, f2, f3, f4, f5);
 		setRotationAngles(f, f1, f2, f3, f4, f5, entity);
 		beardStage = 15;
-		
+
 		if (beardStage >= 1)
 		{
 			GL11.glPushMatrix();
@@ -234,9 +233,14 @@ public class ModelBeard extends ModelBase
 			stage9a.render(f5);
 			stage9b.render(f5);
 		}
+		renderBottomBeard(entity, f, f1, f2, f3, f4, f5, beardStage, growStage);
+	}
+
+	private void renderBottomBeard(Entity entity, float f, float f1, float f2, float f3, float f4, float f5, int beardStage, int growStage)
+	{
 		if (entity != null && (entity.motionX > 0 || entity.motionZ > 0))
 		{
-			//			beardShake += 0.25f;
+			//			beardShake += 0.25f; 
 			beardShake += (float) (beardStage / 3) / 15;
 		}
 		else if (beardShake > 0)
@@ -246,6 +250,9 @@ public class ModelBeard extends ModelBase
 		Minecraft mc = Minecraft.getMinecraft();
 		if (mc.currentScreen == null || (mc.currentScreen != null && !mc.currentScreen.doesGuiPauseGame()))
 		{
+			if (entity.motionY > 0 || entity.motionY < -0.8F)
+				GL11.glRotatef((float) -Math.cos((float) entity.motionY) * 8 * (float) entity.motionY * 3, 5, 0, 0);
+			GL11.glTranslatef(0, -0.05f, 0);
 			GL11.glRotatef((float) Math.cos(beardShake) * 5, 0.5f, 1.0f, 0.0f);
 			GL11.glRotatef((float) Math.sin(beardShake) * 5, 0.0f, 1.0f, 0.5f);
 			if (entity != null && !(entity.rotationPitch < -10))

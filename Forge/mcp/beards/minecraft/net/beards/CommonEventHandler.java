@@ -61,11 +61,20 @@ public class CommonEventHandler
 			}
 			if (shouldSendUpdate)
 			{
-				ByteArrayOutputStream data = new ByteArrayOutputStream();
-				data.write(entityTag.getInteger("BeardGrowth"));
-				data.write(entityTag.getInteger("BeardStage"));
-				PacketDispatcher.sendPacketToAllPlayers(new Packet250CustomPayload("beards", data.toByteArray()));
-				shouldSendUpdate = false;
+				try
+				{
+					ByteArrayOutputStream data = new ByteArrayOutputStream();
+					DataOutputStream outputStream = new DataOutputStream(data);
+					outputStream.writeInt(0);
+					outputStream.writeInt(entityTag.getInteger("BeardGrowth"));
+					outputStream.writeInt(entityTag.getInteger("BeardStage"));
+					PacketDispatcher.sendPacketToAllPlayers(new Packet250CustomPayload("beards", data.toByteArray()));
+					shouldSendUpdate = false;
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
 			}
 		}
 	}

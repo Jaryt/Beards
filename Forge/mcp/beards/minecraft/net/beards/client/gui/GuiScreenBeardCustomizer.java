@@ -4,15 +4,19 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import net.beards.client.model.ModelBeard;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemShears;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.util.ResourceLocation;
@@ -28,15 +32,21 @@ public class GuiScreenBeardCustomizer extends GuiScreen
 
 	public static final ResourceLocation BACKGROUND = new ResourceLocation("beards", "/gui/beardCustomizer.png");
 
+	public static ResourceLocation shears;
+
 	public GuiTextField beardNameField;
 
-	public int textMinX, textMinY;
+	public int textMinX, textMinY, openSize, openStyle;
 
 	public float openR, openG, openB;
 
 	public boolean isFinalized;
 
 	public NBTTagCompound tag;
+
+	private int renderWarning;
+
+	protected static final RenderItem itemRenderer = new RenderItem();
 
 	public GuiScreenBeardCustomizer()
 	{
@@ -47,6 +57,8 @@ public class GuiScreenBeardCustomizer extends GuiScreen
 			openR = tag.getFloat("BeardRed");
 			openG = tag.getFloat("BeardGreen");
 			openB = tag.getFloat("BeardBlue");
+			openSize = tag.getInteger("BeardStage");
+			openStyle = tag.getInteger("BeardStyle");
 		}
 	}
 
@@ -61,6 +73,8 @@ public class GuiScreenBeardCustomizer extends GuiScreen
 				tag.setFloat("BeardRed", openR);
 				tag.setFloat("BeardGreen", openG);
 				tag.setFloat("BeardBlue", openB);
+				tag.setInteger("BeardStage", openSize);
+				tag.setInteger("BeardStyle", openStyle);
 			}
 		}
 	}
@@ -69,6 +83,7 @@ public class GuiScreenBeardCustomizer extends GuiScreen
 	public void initGui()
 	{
 		super.initGui();
+		animation = 0;
 		float r = 1.0f;
 		float g = 1.0f;
 		float b = 1.0f;
@@ -85,6 +100,17 @@ public class GuiScreenBeardCustomizer extends GuiScreen
 		this.buttonList.add(new GuiRGBSlider(2, this.width / 2 - 20 + 0 % 2 * 160, this.height / 6 + 38 + 24 * (0 >> 1), "Red", r));
 		this.buttonList.add(new GuiRGBSlider(3, this.width / 2 - 20 + 0 % 2 * 160, this.height / 6 + 38 + 22 + 24 * (0 >> 1), "Green", g));
 		this.buttonList.add(new GuiRGBSlider(4, this.width / 2 - 20 + 0 % 2 * 160, this.height / 6 + 38 + 44 + 24 * (0 >> 1), "Blue", b));
+		this.buttonList.add(new GuiSmallButton(5, this.width / 2 + 79, this.height / 6 + 50, 10, 10, ">"));
+		this.buttonList.add(new GuiSmallButton(6, this.width / 2 + 60, this.height / 6 + 50, 10, 10, "<"));
+		this.buttonList.add(new GuiSmallButton(7, this.width / 2 + 79, this.height / 6 + 63, 10, 10, ">"));
+		this.buttonList.add(new GuiSmallButton(8, this.width / 2 + 60, this.height / 6 + 63, 10, 10, "<"));
+		this.buttonList.add(new GuiButton(9, this.width / 2 - 79, this.height / 6 + 110, 54, 20, "Shave"));
+		((GuiSmallButton) buttonList.get(4)).drawButton = false;
+		((GuiSmallButton) buttonList.get(5)).drawButton = false;
+		((GuiSmallButton) buttonList.get(6)).drawButton = false;
+		((GuiSmallButton) buttonList.get(7)).drawButton = false;
+		((GuiSmallButton) buttonList.get(6)).enabled = false;
+		((GuiButton) buttonList.get(8)).drawButton = false;
 		textMinX = this.width / 2 - 20;
 		textMinY = this.height / 6 + 110;
 		beardNameField = new GuiTextField(mc.fontRenderer, textMinX, textMinY, 100, 20);
@@ -99,6 +125,10 @@ public class GuiScreenBeardCustomizer extends GuiScreen
 		{
 		case 1:
 			String beardName = beardNameField.getText();
+			if (tag != null)
+			{
+				tag.setString("BeardName", beardName);
+			}
 			float r = ((GuiRGBSlider) buttonList.get(1)).sliderValue;
 			float g = ((GuiRGBSlider) buttonList.get(2)).sliderValue;
 			float b = ((GuiRGBSlider) buttonList.get(3)).sliderValue;
@@ -108,11 +138,11 @@ public class GuiScreenBeardCustomizer extends GuiScreen
 
 			try
 			{
+				output.writeInt(0);
 				output.writeUTF(beardName);
 				output.writeFloat(r);
 				output.writeFloat(g);
 				output.writeFloat(b);
-				PacketDispatcher.sendPacketToAllPlayers(new Packet250CustomPayload("beards", outstream.toByteArray()));
 				PacketDispatcher.sendPacketToServer(new Packet250CustomPayload("beards", outstream.toByteArray()));
 				isFinalized = true;
 			}
@@ -121,6 +151,26 @@ public class GuiScreenBeardCustomizer extends GuiScreen
 				e.printStackTrace();
 			}
 
+			break;
+		case 6:
+			if (tag != null)
+			{
+				tag.setInteger("BeardStyle", tag.getInteger("Style") - 1);
+			}
+			break;
+		case 7:
+			System.out.println(tag.getInteger("BeardStage"));
+			if (tag != null && tag.getInteger("BeardStage") < openSize)
+			{
+				tag.setInteger("BeardStage", tag.getInteger("BeardStage") + 1);
+			}
+			break;
+		case 8:
+			System.out.println(tag.getInteger("BeardStage"));
+			if (tag != null && tag.getInteger("BeardStage") > 1)
+			{
+				tag.setInteger("BeardStage", tag.getInteger("BeardStage") - 1);
+			}
 			break;
 		}
 	}
@@ -146,6 +196,22 @@ public class GuiScreenBeardCustomizer extends GuiScreen
 		else
 		{
 			beardNameField.setFocused(false);
+		}
+		int i = (this.width - 172) / 2 + 166;
+		int j = this.height / 6 + 30;
+		if (par2 > j && par2 < (j + 24))
+		{
+			if (par1 > i + (int) animation + (animation > 0 ? 0 : 3) && par1 < (i + (int) animation + (animation > 0 ? 0 : 3) + 24) && !shouldAnimate)
+			{
+				if (canShave)
+					shouldAnimate = true;
+				else
+					renderWarning = 60;
+			}
+			if (par1 > i + 69 && par1 < (i + 24) + 69 && shouldAnimate)
+			{
+				shouldAnimate = false;
+			}
 		}
 	}
 
@@ -186,18 +252,95 @@ public class GuiScreenBeardCustomizer extends GuiScreen
 		OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);
 	}
 
+	public int animation;
+
+	public boolean shouldAnimate = false;
+
+	private boolean canShave;
+
 	@Override
 	public void drawScreen(int par1, int par2, float par3)
 	{
 		this.drawDefaultBackground();
-		ModelBeard beard;
-		beard = new ModelBeard();
+		if (tag != null)
+		{
+			if (tag.getInteger("BeardStage") + 1 > openSize)
+				((GuiSmallButton) buttonList.get(6)).enabled = false;
+			else
+				((GuiSmallButton) buttonList.get(6)).enabled = true;
+			if (tag.getInteger("BeardStage") - 1 <= 0)
+				((GuiSmallButton) buttonList.get(7)).enabled = false;
+			else
+				((GuiSmallButton) buttonList.get(7)).enabled = true;
+		}
 		mc.renderEngine.bindTexture(BACKGROUND);
 		int k = (this.width - 172) / 2;
-		this.drawTexturedModalRect(k, 0, 0, -330, 172, this.height);
+		this.drawTexturedModalRect(k, this.height / 6 + 30, 0, 0, 172, 108);
+		((GuiSmallButton) buttonList.get(4)).yPosition = this.height / 6 + 50;
+		((GuiSmallButton) buttonList.get(4)).xPosition = k + 150 + animation;
+		((GuiSmallButton) buttonList.get(5)).xPosition = k + 137 + animation;
+		((GuiSmallButton) buttonList.get(6)).xPosition = k + 150 + animation;
+		((GuiSmallButton) buttonList.get(7)).xPosition = k + 137 + animation;
+		if (shouldAnimate)
+		{
+			if (animation > 30)
+			{
+				((GuiSmallButton) buttonList.get(5)).drawButton = true;
+				((GuiSmallButton) buttonList.get(7)).drawButton = true;
+			}
+			if (animation > 20)
+			{
+				((GuiSmallButton) buttonList.get(4)).drawButton = true;
+				((GuiSmallButton) buttonList.get(6)).drawButton = true;
+			}
+			if (animation < 69)
+				this.buttonList.set(8, new GuiButton(9, this.width / 2 + 90, this.height / 6 + 75, 54 / ((69 / 5 - (animation + 1) / 5) + 1), 20, ""));
+			else
+				((GuiButton) this.buttonList.get(8)).displayString = "Shave";
+			if (animation < 69)
+			{
+				animation += 3;
+			}
+		}
+		else
+		{
+			if (animation > 0)
+			{
+				animation -= 3;
+				((GuiButton) buttonList.get(8)).drawButton = false;
+				if (animation < 20)
+				{
+					((GuiSmallButton) buttonList.get(4)).drawButton = false;
+					((GuiSmallButton) buttonList.get(6)).drawButton = false;
+				}
+				if (animation < 30)
+				{
+					((GuiSmallButton) buttonList.get(5)).drawButton = false;
+					((GuiSmallButton) buttonList.get(7)).drawButton = false;
+				}
+			}
+		}
+		if (animation > 0)
+		{
+			this.drawTexturedModalRect(k + 100 + animation, this.height / 6 + 30, 0, 108, 69, 69);
+		}
+		int animationShift = (int) animation + (animation > 0 ? 0 : 3);
+		this.drawTexturedModalRect(k + 166 + animationShift, this.height / 6 + 30, 172, 0, 24, 23);
+		this.drawTexturedModalRect(k + 166 + animationShift, this.height / 6 + 30, 172, 0, 24, 23);
+		if (animation > 0)
+			this.drawTexturedModalRect(k + 166, this.height / 6 + 96, 69, 108, 10, 3);
+		if (renderWarning > 0)
+		{
+			renderWarning--;
+			drawCenteredString(mc.fontRenderer, "You must have Shears in hand!", k + 80, this.height / 6 + 30 - renderWarning, 14737632 - (renderWarning * 2 + 1));
+		}
+		if (animation >= 69)
+		{
+			drawString(mc.fontRenderer, "Style:", k + 179, this.height / 6 + 50, 14737632);
+			drawString(mc.fontRenderer, "Size:", k + 180, this.height / 6 + 64, 14737632);
+		}
 		this.beardNameField.drawTextBox();
 		beardNameField.updateCursorCounter();
-		super.drawScreen(par1, par2, par3);
 		float r = ((GuiRGBSlider) buttonList.get(1)).sliderValue;
 		float g = ((GuiRGBSlider) buttonList.get(2)).sliderValue;
 		float b = ((GuiRGBSlider) buttonList.get(3)).sliderValue;
@@ -206,7 +349,20 @@ public class GuiScreenBeardCustomizer extends GuiScreen
 			tag.setFloat("BeardRed", r);
 			tag.setFloat("BeardGreen", g);
 			tag.setFloat("BeardBlue", b);
+			tag.setBoolean("disableLighting", true);
 		}
-		func_110423_a(width / 2 - 52, 150, 35, 0, 0, mc.thePlayer);
+		func_110423_a(width / 2 - 52, this.height / 6 + 106, 35, 0, 0, mc.thePlayer);
+		super.drawScreen(par1, par2, par3);
+		if (mc.thePlayer.getCurrentEquippedItem() == null || (mc.thePlayer.getCurrentEquippedItem() != null && !(mc.thePlayer.getCurrentEquippedItem().getItem() instanceof ItemShears)))
+		{
+			canShave = false;
+			itemRenderer.renderWithColor = false;
+			GL11.glColor3f(0.2f, 0.2f, 0.2f);
+		}
+		else
+		{
+			canShave = true;
+		}
+		itemRenderer.renderItemIntoGUI(mc.fontRenderer, mc.renderEngine, new ItemStack(Item.shears), k + 169 + animationShift, this.height / 6 + 33, false);
 	}
 }
