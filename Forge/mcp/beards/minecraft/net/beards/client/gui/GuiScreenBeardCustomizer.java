@@ -61,6 +61,7 @@ public class GuiScreenBeardCustomizer extends GuiScreen
 			openSize = tag.getInteger("BeardGrowth");
 			openStyle = tag.getInteger("BeardStyle");
 			selectedSize = openSize;
+			tag.setBoolean("disableLighting", true);
 		}
 	}
 
@@ -77,8 +78,7 @@ public class GuiScreenBeardCustomizer extends GuiScreen
 				tag.setFloat("BeardBlue", openB);
 			}
 		}
-		tag.setInteger("BeardStyle", openStyle);
-		tag.setInteger("BeardGrowth", openSize);
+		tag.setBoolean("disableLighting", false);
 	}
 
 	@Override
@@ -206,11 +206,16 @@ public class GuiScreenBeardCustomizer extends GuiScreen
 					dOut.writeInt(tag.getInteger("BeardStyle"));
 					dOut.writeInt(tag.getInteger("BeardGrowth"));
 					PacketDispatcher.sendPacketToServer(new Packet250CustomPayload("beards", bOut.toByteArray()));
+					if (openStyle != tag.getInteger("BeardStyle"))
+						tag.setInteger("BeardGrowth", 0);
 				}
 				catch (IOException io)
 				{
 					io.printStackTrace();
 				}
+				tag.setInteger("BeardStyle", openStyle);
+				tag.setInteger("BeardGrowth", openSize);
+				mc.displayGuiScreen((GuiScreen) null);
 			}
 			break;
 		}

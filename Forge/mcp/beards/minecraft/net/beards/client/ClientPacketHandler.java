@@ -118,6 +118,15 @@ public class ClientPacketHandler implements IPacketHandler
 						tag.setBoolean("BeardSeen", true);
 					}
 					break;
+				case 4:
+					String username = stream.readUTF();
+					if (playerCMP != null)
+						updatedPlayer = playerCMP.worldObj.getPlayerEntityByName(username);
+					if (updatedPlayer != null)
+						tag = updatedPlayer.getEntityData();
+					tag.setInteger("BeardStyle", stream.readInt());
+					tag.setInteger("BeardGrowth", stream.readInt());
+					break;
 				}
 			}
 			catch (IOException e)

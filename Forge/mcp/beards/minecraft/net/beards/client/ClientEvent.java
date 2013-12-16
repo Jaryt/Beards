@@ -80,6 +80,7 @@ public class ClientEvent
 				GL11.glDisable(GL11.GL_LIGHTING);
 			Minecraft.getMinecraft().renderEngine.bindTexture(beardTexture);
 			beard.render(event.entityPlayer, tag.getFloat("BeardShake"), 0.0f, 0.0f, 0.0f, 0.0f, 0.0625f, tag.getInteger("BeardGrowth"), tag.getInteger("BeardStage"));
+			GL11.glEnable(GL11.GL_LIGHTING);
 			GL11.glPopMatrix();
 			if (tag.getBoolean("BeardSeen") == false)
 			{

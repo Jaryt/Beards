@@ -6,6 +6,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import org.lwjgl.Sys;
+
 import net.beards.beard.Beard;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -82,32 +84,41 @@ public class ServerPacketHandler implements IPacketHandler
 					tag = playerMP.getEntityData();
 					if (tag != null)
 					{
-						int curBeardSize = tag.getInteger("BeardSize");
 						int curBeardStyle = tag.getInteger("BeardStyle");
-						int newBeardSize = stream.readInt();
+						int curBeardSize = tag.getInteger("BeardGrowth");
 						int newBeardStyle = stream.readInt();
+						int newBeardSize = stream.readInt();
 
 						Beard curBeard = Beard.getBeardFromId(curBeardStyle);
 						Beard newBeard = Beard.getBeardFromId(newBeardStyle);
 
 						ItemStack item = playerMP.getCurrentEquippedItem();
 
+						outStream.writeInt(4);
+						outStream.writeUTF(playerMP.username);
 						if (item != null && item.getItem() instanceof ItemShears)
 						{
-							if (!newBeard.equals(curBeard) && curBeardSize >= newBeard.minShaveSize)
+							if (!newBeard.equals(curBeard) && curBeardSize >= newBeard.minShaveSize && item.getMaxDamage() - item.getItemDamage() >= newBeard.minShaveSize)
 							{
-
+								outStream.writeInt(newBeardStyle);
+								outStream.writeInt(0);
+								tag.setInteger("BeardStyle", newBeardStyle);
+								tag.setInteger("BeardGrowth", 0);
+								item.damageItem(newBeard.minShaveSize, playerMP);
 							}
 							else
 							{
-								if (newBeardSize < curBeardSize)
+								if (newBeardSize < curBeardSize && item.getMaxDamage() - item.getItemDamage() >= curBeardSize - newBeardSize)
 								{
-
+									outStream.writeInt(curBeardStyle);
+									outStream.writeInt(newBeardSize);
+									tag.setInteger("BeardGrowth", newBeardSize);
+									item.damageItem(newBeardSize, playerMP);
 								}
 							}
 						}
 					}
-
+					PacketDispatcher.sendPacketToAllPlayers(new Packet250CustomPayload("beards", outByte.toByteArray()));
 					break;
 				}
 			}
