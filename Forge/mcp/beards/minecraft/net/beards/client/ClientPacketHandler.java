@@ -46,16 +46,22 @@ public class ClientPacketHandler implements IPacketHandler
 				switch (packetId)
 				{
 				case 0:
-					tag.setInteger("BeardGrowth", stream.readInt());
-					tag.setInteger("BeardStage", stream.readInt());
+					int beardGrowth = stream.readInt();
+					int beardStage = stream.readInt();
+					if (playerCMP != null)
+						updatedPlayer = playerCMP.worldObj.getPlayerEntityByName(stream.readUTF());
+					if (updatedPlayer != null)
+						tag = updatedPlayer.getEntityData();
+					tag.setInteger("BeardGrowth", beardGrowth);
+					tag.setInteger("BeardStage", beardStage);
 					break;
 				case 1:
 					String beardName = stream.readUTF();
 					float r = stream.readFloat();
 					float g = stream.readFloat();
 					float b = stream.readFloat();
-					int beardSize = stream.readInt();
-					int beardStage = stream.readInt();
+					beardGrowth = stream.readInt();
+					beardStage = stream.readInt();
 					String playerName = stream.readUTF();
 					if (playerCMP != null)
 						updatedPlayer = playerCMP.worldObj.getPlayerEntityByName(playerName);
@@ -67,8 +73,8 @@ public class ClientPacketHandler implements IPacketHandler
 						tag.setFloat("BeardRed", r);
 						tag.setFloat("BeardGreen", g);
 						tag.setFloat("BeardBlue", b);
-						tag.setInteger("BeardGrowth", beardSize);
-						tag.setInteger("BeardStage", beardSize);
+						tag.setInteger("BeardGrowth", beardGrowth);
+						tag.setInteger("BeardStage", beardGrowth);
 					}
 					break;
 				case 2:
@@ -92,7 +98,7 @@ public class ClientPacketHandler implements IPacketHandler
 				case 3:
 					playerName = stream.readUTF();
 					beardStage = stream.readInt();
-					beardSize = stream.readInt();
+					beardGrowth = stream.readInt();
 					beardName = stream.readUTF();
 					r = stream.readFloat();
 					g = stream.readFloat();
@@ -107,8 +113,8 @@ public class ClientPacketHandler implements IPacketHandler
 						tag.setFloat("BeardRed", r);
 						tag.setFloat("BeardGreen", g);
 						tag.setFloat("BeardBlue", b);
-						tag.setInteger("BeardGrowth", beardSize);
-						tag.setInteger("BeardStage", beardSize);
+						tag.setInteger("BeardGrowth", beardGrowth);
+						tag.setInteger("BeardStage", beardGrowth);
 						tag.setBoolean("BeardSeen", true);
 					}
 					break;

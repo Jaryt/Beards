@@ -17,15 +17,14 @@ public class Beard
 
 	public static Beard lumberjack, dwarf;
 
-	public int maxSize; 
+	public int maxSize, id, minShaveSize;
 	
-	public int id;
-	
-	public Beard(int id, String beardName, int maxSize)
+	public Beard(int id, String beardName, int maxSize, int minShaveSize)
 	{
 		this.id = id;
 		this.beardName = beardName;
 		this.maxSize = maxSize;
+		this.minShaveSize = minShaveSize;
 	}
 
 	public Beard setModel(ModelBeardBase beardModel)
@@ -46,8 +45,8 @@ public class Beard
 	
 	public static void createBeards()
 	{
-		lumberjack = new Beard(0, "Lumberjack", 14).setModel(new ModelLumberjackBeard()).finalizeBeard();
-		dwarf = new Beard(1, "Dwarf", 16).setModel(new ModelDwarfBeard()).finalizeBeard();
+		lumberjack = new Beard(0, "Lumberjack", 14, 14).setModel(new ModelLumberjackBeard()).finalizeBeard();
+		dwarf = new Beard(1, "Dwarf", 15, 14).setModel(new ModelDwarfBeard()).finalizeBeard();
 	}
 
 }

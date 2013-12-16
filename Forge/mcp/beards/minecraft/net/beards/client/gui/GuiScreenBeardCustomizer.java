@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import net.beards.beard.Beard;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
@@ -57,8 +58,9 @@ public class GuiScreenBeardCustomizer extends GuiScreen
 			openR = tag.getFloat("BeardRed");
 			openG = tag.getFloat("BeardGreen");
 			openB = tag.getFloat("BeardBlue");
-			openSize = tag.getInteger("BeardStage");
+			openSize = tag.getInteger("BeardGrowth");
 			openStyle = tag.getInteger("BeardStyle");
+			selectedSize = openSize;
 		}
 	}
 
@@ -73,10 +75,10 @@ public class GuiScreenBeardCustomizer extends GuiScreen
 				tag.setFloat("BeardRed", openR);
 				tag.setFloat("BeardGreen", openG);
 				tag.setFloat("BeardBlue", openB);
-				tag.setInteger("BeardStage", openSize);
-				tag.setInteger("BeardStyle", openStyle);
 			}
 		}
+		tag.setInteger("BeardStyle", openStyle);
+		tag.setInteger("BeardGrowth", openSize);
 	}
 
 	@Override
@@ -152,24 +154,63 @@ public class GuiScreenBeardCustomizer extends GuiScreen
 			}
 
 			break;
+		case 5:
+			if (tag != null)
+			{
+				int beardStyle = tag.getInteger("BeardStyle");
+				if (Beard.getBeardFromId(beardStyle + 1) != null)
+				{
+					tag.setInteger("BeardStyle", beardStyle + 1);
+				}
+				else
+				{
+					tag.setInteger("BeardStyle", 0);
+				}
+			}
+			break;
 		case 6:
 			if (tag != null)
 			{
-				tag.setInteger("BeardStyle", tag.getInteger("Style") - 1);
+				int beardStyle = tag.getInteger("BeardStyle");
+				if (Beard.getBeardFromId(beardStyle - 1) != null)
+				{
+					tag.setInteger("BeardStyle", beardStyle - 1);
+				}
+				else
+				{
+					tag.setInteger("BeardStyle", Beard.beardMaps.size() - 1);
+				}
 			}
 			break;
 		case 7:
-			System.out.println(tag.getInteger("BeardStage"));
-			if (tag != null && tag.getInteger("BeardStage") < openSize)
+			if (selectedSize < openSize)
 			{
-				tag.setInteger("BeardStage", tag.getInteger("BeardStage") + 1);
+				selectedSize++;
 			}
 			break;
 		case 8:
-			System.out.println(tag.getInteger("BeardStage"));
-			if (tag != null && tag.getInteger("BeardStage") > 1)
+			if (selectedSize > 0)
 			{
-				tag.setInteger("BeardStage", tag.getInteger("BeardStage") - 1);
+				selectedSize--;
+			}
+			break;
+		case 9:
+			if (tag != null)
+			{
+				ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+				DataOutputStream dOut = new DataOutputStream(bOut);
+
+				try
+				{
+					dOut.writeInt(2);
+					dOut.writeInt(tag.getInteger("BeardStyle"));
+					dOut.writeInt(tag.getInteger("BeardGrowth"));
+					PacketDispatcher.sendPacketToServer(new Packet250CustomPayload("beards", bOut.toByteArray()));
+				}
+				catch (IOException io)
+				{
+					io.printStackTrace();
+				}
 			}
 			break;
 		}
@@ -258,20 +299,30 @@ public class GuiScreenBeardCustomizer extends GuiScreen
 
 	private boolean canShave;
 
+	private int selectedSize;
+
 	@Override
 	public void drawScreen(int par1, int par2, float par3)
 	{
 		this.drawDefaultBackground();
 		if (tag != null)
 		{
-			if (tag.getInteger("BeardStage") + 1 > openSize)
+			Beard beard = Beard.getBeardFromId(tag.getInteger("BeardStyle"));
+			if (tag.getInteger("BeardGrowth") + 1 > openSize)
 				((GuiSmallButton) buttonList.get(6)).enabled = false;
 			else
 				((GuiSmallButton) buttonList.get(6)).enabled = true;
-			if (tag.getInteger("BeardStage") - 1 <= 0)
+			if (tag.getInteger("BeardGrowth") - 1 < 0)
 				((GuiSmallButton) buttonList.get(7)).enabled = false;
 			else
 				((GuiSmallButton) buttonList.get(7)).enabled = true;
+			if (tag.getInteger("BeardGrowth") != selectedSize)
+				tag.setInteger("BeardGrowth", selectedSize);
+			ItemStack stack = mc.thePlayer.getCurrentEquippedItem();
+			if ((openSize > tag.getInteger("BeardGrowth") || (!(beard.equals(Beard.getBeardFromId(openStyle))) && tag.getInteger("BeardGrowth") >= beard.minShaveSize)) && stack != null && stack.getMaxDamage() - stack.getItemDamage() >= tag.getInteger("BeardGrowth"))
+				((GuiButton) buttonList.get(8)).enabled = true;
+			else
+				((GuiButton) buttonList.get(8)).enabled = false;
 		}
 		mc.renderEngine.bindTexture(BACKGROUND);
 		int k = (this.width - 172) / 2;
@@ -336,7 +387,7 @@ public class GuiScreenBeardCustomizer extends GuiScreen
 		}
 		if (animation >= 69)
 		{
-			drawString(mc.fontRenderer, "Style:", k + 179, this.height / 6 + 50, 14737632);
+			drawString(mc.fontRenderer, "Style:", k + 176, this.height / 6 + 50, 14737632);
 			drawString(mc.fontRenderer, "Size:", k + 180, this.height / 6 + 64, 14737632);
 		}
 		this.beardNameField.drawTextBox();

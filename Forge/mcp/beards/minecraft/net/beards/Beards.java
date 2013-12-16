@@ -2,6 +2,9 @@ package net.beards;
 
 import net.beards.beard.Beard;
 import net.beards.client.ClientPacketHandler;
+import net.beards.commands.CommandSetBeard;
+import net.minecraft.command.ServerCommand;
+import net.minecraft.command.ServerCommandManager;
 import net.minecraftforge.common.MinecraftForge;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -9,6 +12,7 @@ import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.network.NetworkMod.SidedPacketHandler;
 import cpw.mods.fml.common.registry.GameRegistry;
@@ -32,4 +36,10 @@ public class Beards
 		GameRegistry.registerPlayerTracker(new PlayerTracker());
 	}
 
+	@EventHandler
+	public void onServerStart(FMLServerStartingEvent event)
+	{
+		event.registerServerCommand(new CommandSetBeard());
+	}
+	
 }

@@ -11,6 +11,7 @@ import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelBox;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.entity.Entity;
+import net.minecraft.nbt.NBTTagCompound;
 
 import org.lwjgl.opengl.GL11;
 
@@ -185,7 +186,6 @@ public class ModelLumberjackBeard extends ModelBeardBase
 	{
 		super.render(entity, f, f1, f2, f3, f4, f5);
 		setRotationAngles(f, f1, f2, f3, f4, f5, entity);
-		beardStage = 15;
 
 		if (beardStage >= 1)
 		{
@@ -233,84 +233,43 @@ public class ModelLumberjackBeard extends ModelBeardBase
 			stage9a.render(f5);
 			stage9b.render(f5);
 		}
-		renderBottomBeard(entity, f, f1, f2, f3, f4, f5, beardStage, growStage);
-	}
-
-	private void renderBottomBeard(Entity entity, float f, float f1, float f2, float f3, float f4, float f5, int beardStage, int growStage)
-	{
-		if (entity != null && (entity.motionX > 0 || entity.motionZ > 0))
-		{
-			//			beardShake += 0.25f; 
-			beardShake += (float) (beardStage / 3) / 15;
-		}
-		else if (beardShake > 0)
-		{
-			beardShake -= 0.05f;
-		}
+		NBTTagCompound tag = entity.getEntityData();
 		Minecraft mc = Minecraft.getMinecraft();
 		if (mc.currentScreen == null || (mc.currentScreen != null && !mc.currentScreen.doesGuiPauseGame()))
 		{
-			if (entity.motionY > 0 || entity.motionY < -0.8F)
-				GL11.glRotatef((float) -Math.cos((float) entity.motionY) * 8 * (float) entity.motionY * 3, 5, 0, 0);
+			if (f1 > 0 || f1 < -0.8F)
+				GL11.glRotatef((float) -Math.cos((float) f1) * 8 * (float) f1 * 3, 5, 0, 0);
 			GL11.glTranslatef(0, -0.05f, 0);
-			GL11.glRotatef((float) Math.cos(beardShake) * 5, 0.5f, 1.0f, 0.0f);
-			GL11.glRotatef((float) Math.sin(beardShake) * 5, 0.0f, 1.0f, 0.5f);
+			if (tag != null)
+			{
+				GL11.glRotatef((float) Math.cos(f) * 5, 0.5f, 1.0f, 0.0f);
+				GL11.glRotatef((float) Math.sin(f) * 5, 0.0f, 1.0f, 0.5f);
+			}
 			if (entity != null && !(entity.rotationPitch < -10))
 				GL11.glRotatef(-entity.rotationPitch, (entity.rotationPitch * 180 / (float) Math.PI), 0, 0);
 		}
 		if (beardStage >= 9)
-		{
-			doGrowth(stage15, beardStage, growStage);
 			stage10.render(f5);
-		}
 		if (beardStage >= 10)
-		{
-			doGrowth(stage15, beardStage, growStage);
 			stage11.render(f5);
-		}
 		if (beardStage >= 11)
-		{
-			doGrowth(stage15, beardStage, growStage);
 			stage12.render(f5);
-		}
 		if (beardStage >= 12)
-		{
-			doGrowth(stage15, beardStage, growStage);
 			stage13.render(f5);
-		}
 		if (beardStage >= 13)
-		{
-			doGrowth(stage15, beardStage, growStage);
 			stage14.render(f5);
-		}
 		if (beardStage >= 14)
-		{
-			doGrowth(stage15, beardStage, growStage);
 			stage15.render(f5);
-		}
+	}
+
+	private void renderBottomBeard(Entity entity, float f, float f1, float f2, float f3, float f4, float f5, int beardStage, int growStage)
+	{
+		
 	}
 
 	private void doGrowth(ModelRenderer model, int beardGrowth, int growStage, int... yOffset)
 	{
 		float sqrt = (float) (Math.sqrt(beardGrowth / 3) / 3) / 10;
-		//		GL11.glScalef(sqrt, sqrt, sqrt);
-		//		if (model.cubeList.get(0) != null)
-		//		{
-		//			ModelBox box = (ModelBox) model.cubeList.get(0);
-		//			GL11.glTranslatef(0f, model.offsetZ - (box.posY2 - box.posY1) + sqrt * 3, 0f);
-		//			if (yOffset.length >= 3)
-		//			{
-		//				if ((beardGrowth & 3) == 1)
-		//				{
-		//
-		//				}
-		//				GL11.glTranslatef(0f, (box.posY2 - box.posY1) / 5.5f, -0.5f);
-		//			}
-		//			else
-		//			{
-		//				GL11.glTranslatef(0f, (box.posY2 - box.posY1) / 5.5f, -0.5f);
-		//			}
-		//		}
 	}
 
 	private void setRotation(ModelRenderer model, float x, float y, float z)

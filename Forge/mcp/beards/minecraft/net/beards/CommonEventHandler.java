@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import net.beards.beard.Beard;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.packet.Packet250CustomPayload;
@@ -27,7 +28,7 @@ public class CommonEventHandler
 		boolean shouldSendUpdate = false;
 		if (!event.entityLiving.worldObj.isRemote && event.entityLiving instanceof EntityPlayer)
 		{
-			if (entityTag != null && (event.entityLiving.ticksExisted % 20) == 1)
+			if (entityTag != null && (event.entityLiving.ticksExisted % 2000) == 1)
 			{
 				if (entityTag.hasKey("BeardStage") && !event.entityLiving.isDead)
 				{
@@ -35,7 +36,7 @@ public class CommonEventHandler
 					{
 						if (entityTag.hasKey("BeardGrowth"))
 						{
-							if (entityTag.getInteger("BeardGrowth") < 15)
+							if (entityTag.getInteger("BeardGrowth") < Beard.getBeardFromId(entityTag.getInteger("BeardID")).maxSize)
 							{
 								entityTag.setInteger("BeardGrowth", entityTag.getInteger("BeardGrowth") + 1);
 								shouldSendUpdate = true;
@@ -68,6 +69,7 @@ public class CommonEventHandler
 					outputStream.writeInt(0);
 					outputStream.writeInt(entityTag.getInteger("BeardGrowth"));
 					outputStream.writeInt(entityTag.getInteger("BeardStage"));
+					outputStream.writeUTF(event.entityLiving.getEntityName());
 					PacketDispatcher.sendPacketToAllPlayers(new Packet250CustomPayload("beards", data.toByteArray()));
 					shouldSendUpdate = false;
 				}

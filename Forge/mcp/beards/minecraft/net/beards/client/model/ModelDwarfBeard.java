@@ -6,9 +6,13 @@
 
 package net.beards.client.model;
 
+import org.lwjgl.opengl.GL11;
+
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.entity.Entity;
+import net.minecraft.nbt.NBTTagCompound;
 
 public class ModelDwarfBeard extends ModelBeardBase
 {
@@ -308,52 +312,105 @@ public class ModelDwarfBeard extends ModelBeardBase
 	{
 		super.render(entity, f, f1, f2, f3, f4, f5);
 		setRotationAngles(f, f1, f2, f3, f4, f5, entity);
-		stage1.render(f5);
-		stage2a.render(f5);
-		stage2b.render(f5);
-		stage2c.render(f5);
-		stage3a.render(f5);
-		stage3b.render(f5);
-		stage4a.render(f5);
-		stage4b.render(f5);
-		stage5a.render(f5);
-		stage5b.render(f5);
-		stage5c.render(f5);
-		stage5d.render(f5);
-		stage6a.render(f5);
-		stage6b.render(f5);
-		stage7a.render(f5);
-		stage7b.render(f5);
-		stage7d.render(f5);
-		stage7c.render(f5);
-		stage9a.render(f5);
-		stage9b.render(f5);
-		stage10.render(f5);
-		stage13c.render(f5);
-		stage12d.render(f5);
-		stage13d.render(f5);
-		stage12c.render(f5);
-		stage13e.render(f5);
-		stage11c.render(f5);
-		stage14d.render(f5);
-		stage14e.render(f5);
-		stage15e.render(f5);
-		stage11a.render(f5);
-		stage12b.render(f5);
-		stage13a.render(f5);
-		stage14a.render(f5);
-		stage15a.render(f5);
-		stage11b.render(f5);
-		stage11d.render(f5);
-		shape13b.render(f5);
-		stage14b.render(f5);
-		stage15b.render(f5);
-		stage15d.render(f5);
-		stage15c.render(f5);
-		stage14c.render(f5);
-		stage11e.render(f5);
-		stage12e.render(f5);
-		stage12a.render(f5);
+		if (beardStage >= 1)
+			stage1.render(f5);
+		if (beardStage >= 2)
+		{
+			stage2a.render(f5);
+			stage2b.render(f5);
+			stage2c.render(f5);
+		}
+		if (beardStage >= 3)
+		{
+			stage3a.render(f5);
+			stage3b.render(f5);
+		}
+		if (beardStage >= 4)
+		{
+			stage4a.render(f5);
+			stage4b.render(f5);
+		}
+		if (beardStage >= 5)
+		{
+			stage5a.render(f5);
+			stage5b.render(f5);
+			stage5c.render(f5);
+			stage5d.render(f5);
+		}
+		if (beardStage >= 6)
+		{
+			stage6a.render(f5);
+			stage6b.render(f5);
+		}
+		if (beardStage >= 7)
+		{
+			stage7a.render(f5);
+			stage7b.render(f5);
+			stage7d.render(f5);
+			stage7c.render(f5);
+		}
+		if (beardStage >= 8)
+		{
+			stage9a.render(f5);
+			stage9b.render(f5);
+		}
+		NBTTagCompound tag = entity.getEntityData();
+		Minecraft mc = Minecraft.getMinecraft();
+		if (mc.currentScreen == null || (mc.currentScreen != null && !mc.currentScreen.doesGuiPauseGame()))
+		{
+			if (f1 > 0 || f1 < -0.8F)
+				GL11.glRotatef((float) -Math.cos((float) f1) * 8 * (float) f1 * 3, 5, 0, 0);
+			GL11.glTranslatef(0, -0.05f, 0);
+			if (tag != null)
+			{
+				GL11.glRotatef((float) Math.cos(f) * 5, 0.5f, 1.0f, 0.0f);
+				GL11.glRotatef((float) Math.sin(f) * 5, 0.0f, 1.0f, 0.5f);
+			}
+			if (entity != null && !(entity.rotationPitch < -10))
+				GL11.glRotatef(-entity.rotationPitch, (entity.rotationPitch * 180 / (float) Math.PI), 0, 0);
+		}
+		if (beardStage >= 10)
+			stage10.render(f5);
+		if (beardStage >= 11)
+		{
+			stage11c.render(f5);
+			stage11a.render(f5);
+			stage11b.render(f5);
+			stage11d.render(f5);
+			stage11e.render(f5);
+		}
+		if (beardStage >= 12)
+		{
+			stage12a.render(f5);
+			stage12b.render(f5);
+			stage12c.render(f5);
+			stage12d.render(f5);
+			stage12e.render(f5);
+		}
+		if (beardStage >= 13)
+		{
+			stage13a.render(f5);
+			shape13b.render(f5);
+			stage13c.render(f5);
+			stage13d.render(f5);
+			stage13e.render(f5);
+		}
+		if (beardStage >= 14)
+		{
+			stage14a.render(f5);
+			stage14b.render(f5);
+			stage14d.render(f5);
+			stage14e.render(f5);
+			stage14c.render(f5);
+		}
+		if (beardStage >= 15)
+		{
+			stage15b.render(f5);
+			stage15a.render(f5);
+			stage15e.render(f5);
+			stage15d.render(f5);
+			stage15c.render(f5);
+		}
 	}
 
 	private void setRotation(ModelRenderer model, float x, float y, float z)

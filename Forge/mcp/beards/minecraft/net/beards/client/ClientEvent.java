@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.util.Random;
 
 import net.beards.Beards;
+import net.beards.beard.Beard;
+import net.beards.client.model.ModelBeardBase;
 import net.beards.client.model.ModelLumberjackBeard;
 import net.beards.client.model.ModelDwarfBeard;
 import net.minecraft.client.Minecraft;
@@ -24,9 +26,9 @@ import cpw.mods.fml.common.network.PacketDispatcher;
 
 public class ClientEvent
 {
-	public ModelDwarfBeard beard = new ModelDwarfBeard();
+	public ModelBeardBase beard = new ModelBeardBase();
 
-	public static final ResourceLocation BEARD_TEXTURE = new ResourceLocation("beards", "beard2.png");
+	public ResourceLocation beardTexture = new ResourceLocation("beards", "beard2.png");
 
 	@ForgeSubscribe
 	public void onPlayerRender(RenderPlayerEvent.Post event)
@@ -34,6 +36,12 @@ public class ClientEvent
 		NBTTagCompound tag = event.entityPlayer.getEntityData();
 		if (tag != null)
 		{
+			Beard beardObj = Beard.getBeardFromId(tag.getInteger("BeardStyle"));
+			if (beardObj != null)
+			{
+				beardTexture = new ResourceLocation("beards", beardObj.beardName.toLowerCase() + ".png");
+				beard = beardObj.beardModel;
+			}
 			GL11.glPushMatrix();
 			GL11.glRotatef(180, 0, 0, 1);
 			GL11.glRotatef(180, 0, 1, 0);
@@ -58,12 +66,20 @@ public class ClientEvent
 				GL11.glColor3f(color.getRed(), color.getGreen(), color.getBlue());
 			else
 				GL11.glColor3f(tag.getFloat("BeardRed"), tag.getFloat("BeardGreen"), tag.getFloat("BeardBlue"));
+			if (event.entityPlayer.lastTickPosX != event.entityPlayer.posX || event.entityPlayer.lastTickPosZ != event.entityPlayer.posZ)
+			{
+				tag.setFloat("BeardShake", tag.getFloat("BeardShake") + (float) (tag.getInteger("BeardGrowth") / 3) / 15);
+			}
+			else if (tag.getFloat("BeardShake") > 0)
+			{
+				tag.setFloat("BeardShake", tag.getFloat("BeardShake") - 0.015f);
+			}
 			GL11.glRotatef(interpolateRotation(event.entityPlayer.prevRotationYawHead, event.entityPlayer.rotationYawHead, 1), 0, 1, 0);
 			GL11.glRotatef(interpolateRotation(event.entityPlayer.prevRotationPitch, event.entityPlayer.rotationPitch, 1), 1, 0, 0);
 			if (tag.getBoolean("disableLighting"))
 				GL11.glDisable(GL11.GL_LIGHTING);
-			Minecraft.getMinecraft().renderEngine.bindTexture(BEARD_TEXTURE);
-			beard.render(event.entityPlayer, (float) event.entityPlayer.motionX, (float) event.entityPlayer.motionY, (float) event.entityPlayer.motionZ, 0.0f, 0.0f, 0.0625f, tag.getInteger("BeardGrowth"), tag.getInteger("BeardStage"));
+			Minecraft.getMinecraft().renderEngine.bindTexture(beardTexture);
+			beard.render(event.entityPlayer, tag.getFloat("BeardShake"), 0.0f, 0.0f, 0.0f, 0.0f, 0.0625f, tag.getInteger("BeardGrowth"), tag.getInteger("BeardStage"));
 			GL11.glPopMatrix();
 			if (tag.getBoolean("BeardSeen") == false)
 			{
