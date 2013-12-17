@@ -28,7 +28,7 @@ public class ClientEvent
 {
 	public ModelBeardBase beard = new ModelBeardBase();
 
-	public ResourceLocation beardTexture = new ResourceLocation("beards", "beard2.png");
+	public ResourceLocation beardTexture = new ResourceLocation("beards", "wizard.png");
 
 	@ForgeSubscribe
 	public void onPlayerRender(RenderPlayerEvent.Post event)

@@ -31,7 +31,7 @@ public class GuiScreenBeardCustomizer extends GuiScreen
 {
 	public Minecraft mc;
 
-	public static final ResourceLocation BACKGROUND = new ResourceLocation("beards", "/gui/beardCustomizer.png");
+	public static final ResourceLocation BACKGROUND = new ResourceLocation("beards", "gui/beardCustomizer.png");
 
 	public static ResourceLocation shears;
 
