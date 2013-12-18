@@ -79,6 +79,8 @@ public class GuiScreenBeardCustomizer extends GuiScreen
 			}
 		}
 		tag.setBoolean("disableLighting", false);
+		tag.setInteger("BeardGrowth", openSize);
+		tag.setInteger("BeardStyle", openStyle);
 	}
 
 	@Override

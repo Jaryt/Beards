@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.List;
 
 import net.beards.beard.Beard;
+import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
@@ -13,6 +14,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ChatMessageComponent;
 import cpw.mods.fml.common.network.PacketDispatcher;
 
 public class CommandSetBeard extends CommandBase implements ICommand
@@ -62,7 +64,7 @@ public class CommandSetBeard extends CommandBase implements ICommand
 						dOut.writeInt(0);
 						dOut.writeInt(newBeardSize);
 						dOut.writeInt(tag.getInteger("BeardStage"));
-						dOut.writeUTF(astring[0]);
+						dOut.writeUTF(player.username);
 						PacketDispatcher.sendPacketToAllPlayers(new Packet250CustomPayload("beards", bOut.toByteArray()));
 					}
 					catch (IOException ex)
@@ -70,6 +72,9 @@ public class CommandSetBeard extends CommandBase implements ICommand
 						ex.printStackTrace();
 					}
 				}
+			}
+			else
+			{
 			}
 		}
 	}
@@ -83,7 +88,23 @@ public class CommandSetBeard extends CommandBase implements ICommand
 	@Override
 	public List addTabCompletionOptions(ICommandSender icommandsender, String[] astring)
 	{
-        return astring.length == 1 ? getListOfStringsMatchingLastWord(astring, MinecraftServer.getServer().getAllUsernames()) : null;
+		if (astring.length > 1)
+		{
+			EntityPlayer player = icommandsender.getEntityWorld().getPlayerEntityByName(astring[0]);
+			NBTTagCompound tag = player.getEntityData();
+			if (tag != null)
+			{
+				Beard beard = Beard.getBeardFromId(tag.getInteger("BeardStyle"));
+				String[] bstring = new String[beard.maxSize];
+				if (beard != null)
+					for (int i = 0; i < beard.maxSize; i++)
+					{
+						bstring[i] = String.valueOf(i);
+					}
+				return (astring.length == 2 && bstring != null ? getListOfStringsMatchingLastWord(astring, bstring) : null);
+			}
+		}
+		return (astring.length == 1 ? getListOfStringsMatchingLastWord(astring, MinecraftServer.getServer().getAllUsernames()) : null);
 	}
 
 	@Override

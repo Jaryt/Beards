@@ -15,6 +15,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.MathHelper;
 import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
@@ -36,7 +37,7 @@ public class CommonEventHandler
 		boolean shouldSendUpdate = false;
 		if (!event.entityLiving.worldObj.isRemote && event.entityLiving instanceof EntityPlayer)
 		{
-			if (entityTag != null && (event.entityLiving.ticksExisted % 20) == 1)
+			if (entityTag != null && (event.entityLiving.ticksExisted % Beards.globalBeardGrowTicks) == 1)
 			{
 				if (entityTag.hasKey("BeardStage") && !event.entityLiving.isDead)
 				{
@@ -92,6 +93,7 @@ public class CommonEventHandler
 		{
 			if (event.entityLiving.swingProgress > 0)
 			{
+				event.entityLiving.prevSwingProgress -= 0.4f;
 				event.entityLiving.swingProgress -= 0.4f;
 				event.entityLiving.isSwingInProgress = false;
 			}
@@ -109,7 +111,6 @@ public class CommonEventHandler
 
 			if (beard.id == Beard.fumanchu.id)
 			{
-				System.out.println("damage");
 				event.target.attackEntityFrom(DamageSource.causePlayerDamage(event.entityPlayer), 2);
 			}
 			if (beard.id == Beard.dwarf.id)
@@ -142,7 +143,7 @@ public class CommonEventHandler
 							while (iterator.hasNext())
 							{
 								PotionEffect potEffect = (PotionEffect) iterator.next();
-								potEffect.combine(new PotionEffect(potEffect.getPotionID(), potEffect.getDuration(), potEffect.getAmplifier() + (tag.getInteger("BeardGrowth") / 2)));
+								potEffect.combine(new PotionEffect(potEffect.getPotionID(), 0, MathHelper.clamp_int(potEffect.getAmplifier() + (tag.getInteger("BeardGrowth") / 2), 0, 4)));
 							}
 						}
 					}
